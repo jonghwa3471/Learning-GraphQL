@@ -45,9 +45,11 @@ const typeDefs = gql`
     author: User
   }
   type Query {
+    allMovies: [Movie!]!
     allUsers: [User!]!
     allTweets: [Tweet!]!
     tweet(id: ID!): Tweet
+    movie(id: String!): Movie
   }
   type Mutation {
     postTweet(text: String!, userId: ID!): Tweet!
@@ -55,6 +57,29 @@ const typeDefs = gql`
     Deletes a Tweet if found, else returns false
     """
     deleteTweet(id: ID!): Boolean!
+  }
+  type Movie {
+    id: Int!
+    url: String!
+    imdb_code: String!
+    title: String!
+    title_english: String!
+    title_long: String!
+    slug: String!
+    year: Int!
+    rating: Float!
+    runtime: Float!
+    genres: [String]!
+    summary: String
+    description_full: String!
+    synopsis: String
+    yt_trailer_code: String!
+    language: String!
+    background_image: String!
+    background_image_original: String!
+    small_cover_image: String!
+    medium_cover_image: String!
+    large_cover_image: String!
   }
 `;
 
@@ -69,6 +94,20 @@ const resolvers = {
     allUsers() {
       console.log("allUsers called!");
       return users;
+    },
+    async allMovies() {
+      const response = await (
+        await fetch("https://yts.torrentbay.st/api/v2/list_movies.json")
+      ).json();
+      return response.data.movies;
+    },
+    async movie(_, { id }) {
+      const response = await (
+        await fetch(
+          `https://yts.torrentbay.st/api/v2/movie_details.json?movie_id=${id}`
+        )
+      ).json();
+      return response.data.movie;
     },
   },
   Mutation: {
